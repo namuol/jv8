@@ -2,7 +2,7 @@
 	"folders":
 	[
 		{
-			"path": "./jni"
-		}
+			"path": ".",
+      "folder_exclude_patterns": ["obj", "libs", "include", "support"] }
 	]
 }
