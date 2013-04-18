@@ -8,6 +8,8 @@ using namespace v8;
 #include "V8Value.h"
 #include "jv8.h"
 
+namespace jv8 {
+
 V8Runner::V8Runner () {
   isolate = Isolate::New();
   Locker l(isolate);
@@ -65,3 +67,5 @@ void V8Runner::destroy (JNIEnv* env) {
     delete methodDatas[i];
   }
 }
+
+} // namespace jv8

@@ -2,12 +2,12 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE	:= v8_base
-LOCAL_SRC_FILES := ../support/libv8_base.a
+LOCAL_SRC_FILES := ../support/libs/libv8_base.arm.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE	:= v8_nosnapshot
-LOCAL_SRC_FILES :=  ../support/libv8_nosnapshot.a
+LOCAL_SRC_FILES :=  ../support/libs/libv8_nosnapshot.arm.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)

@@ -9,6 +9,7 @@ using namespace std;
 using namespace v8;
 
 #include "jv8.h"
+namespace jv8 {
 
 class V8Value;
 
@@ -26,5 +27,7 @@ public:
 
   friend class V8Value;
 };
+
+} // namespace jv8
 
 #endif // V8RUNNER_H_

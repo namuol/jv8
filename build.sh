@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 NAME=JV8
-V8_SRC_ROOT_DEFAULT=./v8
+V8_SRC_ROOT_DEFAULT=./support/v8
 NUM_CPUS=1
 PLATFORM_VERSION=android-8
 ANT_TARGET=debug
@@ -98,9 +98,7 @@ done
 
 if [[ -z "$V8_SRC_ROOT" ]]
 then
-  msg Please set \$V8_SRC_ROOT or use the -s option.
-  usage
-  exit
+  V8_SRC_ROOT=$V8_SRC_ROOT_DEFAULT
 fi
 
 if [[ -z "$ANDROID_NDK_ROOT" ]]
@@ -123,13 +121,14 @@ fi
 
 msg Building v8 for android target...
 pushd $V8_SRC_ROOT
+make dependencies -j$NUM_CPUS
 make $V8_TARGET -j$NUM_CPUS
 checkForErrors
 popd
 
 msg Copying static library files... 
-mkdir -p support
-rsync -tr $V8_SRC_ROOT/out/$V8_TARGET/obj.target/tools/gyp/*.a support/.
+mkdir -p support/libs
+rsync -tr $V8_SRC_ROOT/out/$V8_TARGET/obj.target/tools/gyp/*.a support/libs/.
 checkForErrors
 
 msg Copying v8 header files...

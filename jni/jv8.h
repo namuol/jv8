@@ -7,6 +7,8 @@ using namespace v8;
 
 #include "V8Value.h"
 
+namespace jv8 {
+
 static jfieldID f_V8Value_handle,
                 f_V8Runner_handle;
 
@@ -60,5 +62,7 @@ registerCallback (const Arguments& args) {
 
   return Undefined();
 }
+
+} // namespace jv8
 
 #endif // JV8_H_

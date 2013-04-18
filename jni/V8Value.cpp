@@ -14,6 +14,8 @@ using namespace v8;
   Context::Scope context_scope(runner->context);\
 }
 
+namespace jv8 {
+
 V8Value::V8Value (V8Runner* _runner) {
   V8_VALUE_INIT(_runner)
   val = Persistent<Value>::New(runner->isolate, Undefined());
@@ -47,3 +49,5 @@ Handle<Value> V8Value::getValue() {
   Context::Scope context_scope(runner->context);
   return val;
 }
+
+} // namespace jv8

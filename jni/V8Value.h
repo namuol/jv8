@@ -4,6 +4,8 @@
 #include <v8.h>
 using namespace v8;
 
+namespace jv8 {
+
 class V8Runner;
 
 class V8Value {
@@ -20,5 +22,7 @@ public:
 
   ~V8Value ();
 };
+
+} // namespace jv8
 
 #endif // V8VALUE_H_
