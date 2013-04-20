@@ -50,4 +50,8 @@ Handle<Value> V8Value::getValue() {
   return val;
 }
 
+V8Runner* V8Value::getRunner() {
+  return runner;
+}
+
 } // namespace jv8

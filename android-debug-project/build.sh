@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NAME=JV8
+NAME=JV8Test
 V8_SRC_ROOT_DEFAULT=./support/v8
 NUM_CPUS=1
 PLATFORM_VERSION=android-8
@@ -137,33 +137,31 @@ rsync -tr $V8_SRC_ROOT/include/* support/include/.
 checkForErrors
 
 msg Building NDK libraries...
-NDK_DEBUG=1 $ANDROID_NDK_ROOT/ndk-build -j$NUM_CPUS
+NDK_DEBUG=1 $ANDROID_NDK_ROOT/ndk-build -j$NUM_CPUS V=1
 checkForErrors "Problem building JNI module."
 
-# msg Building $ANT_TARGET APK...
-# ant $ANT_TARGET
-# checkForErrors "Problem building APK."
+msg Building $ANT_TARGET APK...
+ant $ANT_TARGET
+checkForErrors "Problem building APK."
 
-# if $INSTALL || $DEBUG
-# then
-#   if [[ $ANT_TARGET == "debug" ]]
-#   then
-#     APK_FILE=bin/$NAME-debug.apk
-#   else
-#     APK_FILE=bin/$NAME.apk
-#   fi
-#   msg Installing $APK_FILE to device...
-#   adb install -r $APK_FILE
-# fi
+if $INSTALL || $DEBUG
+then
+  if [[ $ANT_TARGET == "debug" ]]
+  then
+    APK_FILE=bin/$NAME-debug.apk
+  else
+    APK_FILE=bin/$NAME.apk
+  fi
+  msg Installing $APK_FILE to device...
+  adb install -r $APK_FILE
+fi
 
-# if $DEBUG
-# then
-#   msg Starting ndk-gdb...
+if $DEBUG
+then
+  msg Starting ndk-gdb...
 
-#   # HACK? We seem to need to wait, otherwise we get some sort of disconnection.
-#   sleep 3
+  # HACK? We seem to need to wait, otherwise we get some sort of disconnection.
+  sleep 3
   
-#   $ANDROID_NDK_ROOT/ndk-gdb --verbose --force --start
-# fi
-
-ant dist
+  $ANDROID_NDK_ROOT/ndk-gdb --verbose --force --start
+fi

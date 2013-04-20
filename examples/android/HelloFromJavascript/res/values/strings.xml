@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Hello From JavaScript</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="edit_name">Enter your name</string>
+    <string name="button_send">Send to V8</string>
+    <string name="title_activity_show_result">Result from JS</string>
+
+</resources>

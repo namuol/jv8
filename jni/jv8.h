@@ -39,10 +39,10 @@ registerCallback (const Arguments& args) {
   jobject methodObject = data->methodObject;
   jclass V8MappableMethod_class = env->GetObjectClass(methodObject);
   if (!m_V8MappableMethod_methodToRun) {
-    m_V8MappableMethod_methodToRun = env->GetMethodID(V8MappableMethod_class, "methodToRun", "([Lcom/vatedroid/V8Value;)Lcom/vatedroid/V8Value;");
+    m_V8MappableMethod_methodToRun = env->GetMethodID(V8MappableMethod_class, "methodToRun", "([Lcom/jovianware/jv8/V8Value;)Lcom/jovianware/jv8/V8Value;");
   }
 
-  jclass V8Value_class = env->FindClass("com/vatedroid/V8Value");
+  jclass V8Value_class = env->FindClass("com/jovianware/jv8/V8Value");
   if (!m_V8Value_init_internal) {
     m_V8Value_init_internal = env->GetMethodID(V8Value_class, "<init>", "()V");
   }
@@ -51,7 +51,7 @@ registerCallback (const Arguments& args) {
   }
 
   V8Runner* runner = data->runner;
-  jobjectArray jargs = (jobjectArray) env->NewObjectArray(args.Length(), env->FindClass("com/vatedroid/V8Value"), NULL);
+  jobjectArray jargs = (jobjectArray) env->NewObjectArray(args.Length(), env->FindClass("com/jovianware/jv8/V8Value"), NULL);
   for (int i=0; i<args.Length(); ++i) {
     jobject wrappedArg = env->NewObject(V8Value_class, m_V8Value_init_internal);
     env->SetLongField(wrappedArg, f_V8Value_handle, (jlong) new V8Value(data->runner, args[i]));
@@ -60,6 +60,7 @@ registerCallback (const Arguments& args) {
 
   jobject jresult = env->CallObjectMethod(methodObject, m_V8MappableMethod_methodToRun, jargs);
 
+  // TODO Handle return value from Java.
   return Undefined();
 }
 

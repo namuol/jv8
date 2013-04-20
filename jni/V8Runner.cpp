@@ -6,6 +6,7 @@ using namespace v8;
 
 #include "V8Runner.h"
 #include "V8Value.h"
+#include "V8Exception.h"
 #include "jv8.h"
 
 namespace jv8 {
@@ -20,7 +21,7 @@ V8Runner::V8Runner () {
   context = Persistent<Context>(Context::New());
 }
 
-Handle<Value> V8Runner::runJS (const char* js) {
+V8Value* V8Runner::runJS (const char* js) {
   Locker l(isolate);
   Isolate::Scope isolateScope(isolate);
 
@@ -31,13 +32,29 @@ Handle<Value> V8Runner::runJS (const char* js) {
   // Create a string containing the JavaScript source code.
   Handle<String> source = String::New(js);
 
+  TryCatch tryCatch;
+
   // Compile the source code.
-  Handle<Script> script = Script::Compile(source);
-  
+  Handle<Script> script = Script::Compile(source, String::New("program"));
+
+  if (script.IsEmpty()) {
+    if (!tryCatch.HasCaught()) {
+      return NULL;
+    }
+    return new V8Exception(this, tryCatch);
+  }
+
   // Run the script to get the result.
   Handle<Value> result = script->Run();
+
+  if (result.IsEmpty()) {
+    if (!tryCatch.HasCaught()) {
+      return NULL;
+    }
+    return new V8Exception(this, tryCatch);
+  }
   
-  return result;
+  return new V8Value(this, result);
 }
 
 void V8Runner::mapMethod (JNIEnv* env,  jobject v8MappableMethod, const char* name) {
@@ -66,6 +83,14 @@ void V8Runner::destroy (JNIEnv* env) {
     env->DeleteGlobalRef(methodDatas[i]->methodObject);
     delete methodDatas[i];
   }
+}
+
+Isolate* V8Runner::getIsolate() {
+  return isolate;
+}
+
+Handle<Context>& V8Runner::getContext() {
+  return context;
 }
 
 } // namespace jv8

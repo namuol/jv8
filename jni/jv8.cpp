@@ -5,7 +5,11 @@ using namespace v8;
 
 #include "V8Runner.h"
 #include "V8Value.h"
+#include "V8Exception.h"
 #include "jv8.h"
+
+// TODO: Integrate this in with build system:
+#define NDK_GDB_ENTRYPOINT_WAIT_HACK
 
 namespace jv8 {
 
@@ -19,13 +23,40 @@ static jobject V8Runner_runJS (
 ) {
   const char* js = env->GetStringUTFChars(jstr, NULL);
   V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
-  V8Value* result = new V8Value(runner, runner->runJS(js));
-  jclass V8Value_class = env->FindClass("com/vatedroid/V8Value");
-  jobject wrappedResult = env->NewObject(V8Value_class, m_V8Value_init_internal);
-  env->SetLongField(wrappedResult, f_V8Value_handle, (jlong) result);
+  V8Value* returnValue = runner->runJS(js);
+
+  if (returnValue == NULL) {
+    jclass V8Exception_class = env->FindClass("com/jovianware/jv8/V8Exception");
+
+    env->ReleaseStringUTFChars(jstr, js);
+    env->ThrowNew(V8Exception_class, "Unexpected Error running JS");
+    return 0;
+  }
+  
+  if (returnValue->isException()) {
+    Isolate* isolate = runner->getIsolate();
+    Handle<Context>& context = runner->getContext();
+    Locker l(isolate);
+    Isolate::Scope isolateScope(isolate);
+
+    HandleScope handle_scope;
+
+    Context::Scope context_scope(context);
+
+    jclass V8Exception_class = env->FindClass("com/jovianware/jv8/V8Exception");
+    V8Exception* exception = reinterpret_cast<V8Exception*>(returnValue);
+
+    env->ReleaseStringUTFChars(jstr, js);
+    env->ThrowNew(V8Exception_class, *String::Utf8Value(exception->getMessage()->ToString()));
+    return 0;
+  }
+
+  jclass V8Value_class = env->FindClass("com/jovianware/jv8/V8Value");
+  jobject wrappedReturnValue = env->NewObject(V8Value_class, m_V8Value_init_internal);
+  env->SetLongField(wrappedReturnValue, f_V8Value_handle, (jlong) returnValue);
 
   env->ReleaseStringUTFChars(jstr, js);
-  return wrappedResult;
+  return wrappedReturnValue;
 }
 
 static jlong V8Runner_create (
@@ -67,16 +98,30 @@ static void V8Value_init_void (
   env->SetLongField(obj, f_V8Value_handle, (jlong) new V8Value(runner));
 }
 
-static void V8Value_init_str (
+static void V8Value_init_array (
   JNIEnv *env,
   jobject obj,
   jobject jrunner,
-  jstring jstr
+  jobjectArray jarray
 ) {
   V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
-  const char* cstr = env->GetStringUTFChars(jstr, NULL);
-  env->SetLongField(obj, f_V8Value_handle, (jlong) new V8Value(runner, cstr)); 
-  env->ReleaseStringUTFChars(jstr, cstr);
+  Isolate* isolate = runner->getIsolate();
+  Handle<Context>& context = runner->getContext();
+  Locker l(isolate);
+  Isolate::Scope isolateScope(isolate);
+
+  HandleScope handle_scope;
+
+  Context::Scope context_scope(context);
+  int len = env->GetArrayLength(jarray);
+  Local<Array> array = Array::New(len);
+
+  for (int i=0; i<len; ++i) {
+    jobject obj = env->GetObjectArrayElement(jarray, i);
+    V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
+    array->Set(i, val->getValue());
+  }
+  env->SetLongField(obj, f_V8Value_handle, (jlong) new V8Value(runner, array));
 }
 
 static void V8Value_init_num (
@@ -89,36 +134,32 @@ static void V8Value_init_num (
   env->SetLongField(obj, f_V8Value_handle, (jlong) new V8Value(runner, num)); 
 }
 
-static jstring V8Value_asString (
+static void V8Value_init_str (
   JNIEnv *env,
-  jobject obj
+  jobject obj,
+  jobject jrunner,
+  jstring jstr
 ) {
-  V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
-  return env->NewStringUTF(*String::Utf8Value(val->getValue()->ToString()));
+  V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
+  const char* cstr = env->GetStringUTFChars(jstr, NULL);
+  env->SetLongField(obj, f_V8Value_handle, (jlong) new V8Value(runner, cstr)); 
+  env->ReleaseStringUTFChars(jstr, cstr);
 }
 
-static jdouble V8Value_asNumber (
+static jboolean V8Value_isArray (
   JNIEnv *env,
   jobject obj
 ) {
   V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
-  return val->getValue()->NumberValue();
+  return val->getValue()->IsArray();
 }
 
-static jboolean V8Value_asBoolean (
+static jboolean V8Value_isBoolean (
   JNIEnv *env,
   jobject obj
 ) {
   V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
-  return val->getValue()->BooleanValue();
-}
-
-static jboolean V8Value_isString (
-  JNIEnv *env,
-  jobject obj
-) {
-  V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
-  return val->getValue()->IsString();
+  return val->getValue()->IsBoolean();
 }
 
 static jboolean V8Value_isNumber (
@@ -129,12 +170,67 @@ static jboolean V8Value_isNumber (
   return val->getValue()->IsNumber();
 }
 
-static jboolean V8Value_isBoolean (
+static jboolean V8Value_isString (
   JNIEnv *env,
   jobject obj
 ) {
   V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
-  return val->getValue()->IsBoolean();
+  return val->getValue()->IsString();
+}
+
+static jobjectArray V8Value_toArray (
+  JNIEnv *env,
+  jobject obj
+) {
+  V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
+  V8Runner* runner = val->getRunner();
+
+  jclass V8Value_class = env->FindClass("com/jovianware/jv8/V8Value");
+  Array* array = Array::Cast(*val->getValue());
+  jobjectArray jarray = (jobjectArray) env->NewObjectArray(array->Length(), env->FindClass("com/jovianware/jv8/V8Value"), NULL);
+  for (int i=0; i<array->Length(); ++i) {
+    jobject wrappedValue = env->NewObject(V8Value_class, m_V8Value_init_internal);
+    env->SetLongField(wrappedValue, f_V8Value_handle, (jlong) new V8Value(runner, array->Get(i)));
+    env->SetObjectArrayElement(jarray, i, wrappedValue);
+  }
+  return jarray;
+}
+
+static jboolean V8Value_toBoolean (
+  JNIEnv *env,
+  jobject obj
+) {
+  V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
+  return val->getValue()->BooleanValue();
+}
+
+static jdouble V8Value_toNumber (
+  JNIEnv *env,
+  jobject obj
+) {
+  V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
+  return val->getValue()->ToNumber()->Value();
+}
+
+static jstring V8Value_toString (
+  JNIEnv *env,
+  jobject obj
+) {
+  V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
+
+  // We have to setup an isolate context here, perhaps because ToString actually performs some JS 
+  //  magic behind the scenes to coerce the `Value` into a String.
+  V8Runner* runner = val->getRunner();
+  Isolate* isolate = runner->getIsolate();
+  Handle<Context>& context = runner->getContext();
+  Locker l(isolate);
+  Isolate::Scope isolateScope(isolate);
+
+  HandleScope handle_scope;
+
+  Context::Scope context_scope(context);
+
+  return env->NewStringUTF(*String::Utf8Value(val->getValue()->ToString()));
 }
 
 static void V8Value_dispose (
@@ -146,26 +242,27 @@ static void V8Value_dispose (
 
 } // namespace jv8
 
-
 static JNINativeMethod V8Runner_Methods[] = {
   {"create", "()J", (void *) jv8::V8Runner_create},
   {"dispose", "()V", (void *) jv8::V8Runner_destroy},
-  {"runJS", "(Ljava/lang/String;)Lcom/vatedroid/V8Value;", (void *) jv8::V8Runner_runJS},
-  {"map", "(Lcom/vatedroid/V8MappableMethod;Ljava/lang/String;)V", (void *) jv8::V8Runner_map},
+  {"runJS", "(Ljava/lang/String;)Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Runner_runJS},
+  {"map", "(Lcom/jovianware/jv8/V8MappableMethod;Ljava/lang/String;)V", (void *) jv8::V8Runner_map},
 };
 
 static JNINativeMethod V8Value_Methods[] = {
-  {"init", "(Lcom/vatedroid/V8Runner;)V", (void *) jv8::V8Value_init_void},
-  {"init", "(Lcom/vatedroid/V8Runner;Ljava/lang/String;)V", (void *) jv8::V8Value_init_str},
-  {"init", "(Lcom/vatedroid/V8Runner;D)V", (void *) jv8::V8Value_init_num},
+  {"init", "(Lcom/jovianware/jv8/V8Runner;)V", (void *) jv8::V8Value_init_void},
+  {"init", "(Lcom/jovianware/jv8/V8Runner;[Lcom/jovianware/jv8/V8Value;)V", (void *) jv8::V8Value_init_array},
+  {"init", "(Lcom/jovianware/jv8/V8Runner;D)V", (void *) jv8::V8Value_init_num},
+  {"init", "(Lcom/jovianware/jv8/V8Runner;Ljava/lang/String;)V", (void *) jv8::V8Value_init_str},
   {"dispose", "()V", (void *) jv8::V8Value_dispose},
-  {"isString", "()Z", (void *) jv8::V8Value_isString},
-  {"isNumber", "()Z", (void *) jv8::V8Value_isNumber},
+  {"isArray", "()Z", (void *) jv8::V8Value_isArray},
   {"isBoolean", "()Z", (void *) jv8::V8Value_isBoolean},
-  {"asString", "()Ljava/lang/String;", (void *) jv8::V8Value_asString},
-  {"asNumber", "()D", (void *) jv8::V8Value_asNumber},
-  {"asBoolean", "()Z", (void *) jv8::V8Value_asBoolean},
-  {"toString", "()Ljava/lang/String;", (void *) jv8::V8Value_asString}
+  {"isNumber", "()Z", (void *) jv8::V8Value_isNumber},
+  {"isString", "()Z", (void *) jv8::V8Value_isString},
+  {"toArray", "()[Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Value_toArray},
+  {"toNumber", "()D", (void *) jv8::V8Value_toNumber},
+  {"toBoolean", "()Z", (void *) jv8::V8Value_toBoolean},
+  {"toString", "()Ljava/lang/String;", (void *) jv8::V8Value_toString}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,22 +314,22 @@ jint JNI_OnLoad (
   #endif
   ENV_INIT(vm)
 
-  CLASS("com/vatedroid/V8Runner")
+  CLASS("com/jovianware/jv8/V8Runner")
   MTABLE(V8Runner_Methods)
   FIELD("handle", "J", jv8::f_V8Runner_handle)
   CLASS_END()
 
-  CLASS("com/vatedroid/V8Value")
+  CLASS("com/jovianware/jv8/V8Value")
   MTABLE(V8Value_Methods)
   FIELD("handle", "J", jv8::f_V8Value_handle)
-  METHOD("<init>", "(Lcom/vatedroid/V8Runner;)V", jv8::m_V8Value_init)
-  METHOD("<init>", "(Lcom/vatedroid/V8Runner;Ljava/lang/String;)V", jv8::m_V8Value_init_str)
-  METHOD("<init>", "(Lcom/vatedroid/V8Runner;D)V", jv8::m_V8Value_init_num)
+  METHOD("<init>", "(Lcom/jovianware/jv8/V8Runner;)V", jv8::m_V8Value_init)
+  METHOD("<init>", "(Lcom/jovianware/jv8/V8Runner;Ljava/lang/String;)V", jv8::m_V8Value_init_str)
+  METHOD("<init>", "(Lcom/jovianware/jv8/V8Runner;D)V", jv8::m_V8Value_init_num)
   METHOD("<init>", "()V", jv8::m_V8Value_init_internal)
   CLASS_END()
 
-  CLASS("com/vatedroid/V8MappableMethod")
-  METHOD("methodToRun", "([Lcom/vatedroid/V8Value;)Lcom/vatedroid/V8Value;", jv8::m_V8MappableMethod_methodToRun)
+  CLASS("com/jovianware/jv8/V8MappableMethod")
+  METHOD("methodToRun", "([Lcom/jovianware/jv8/V8Value;)Lcom/jovianware/jv8/V8Value;", jv8::m_V8MappableMethod_methodToRun)
   CLASS_END()
 
   return JNI_VERSION_1_6;

@@ -12,6 +12,7 @@ using namespace v8;
 namespace jv8 {
 
 class V8Value;
+class V8Exception;
 
 class V8Runner {
   Isolate* isolate;
@@ -21,11 +22,13 @@ class V8Runner {
 public:
   V8Runner();
 
-  Handle<Value> runJS(const char* str);
+  V8Value* runJS(const char* str);
   void mapMethod (JNIEnv* env,  jobject v8MappableMethod, const char* name);
   void destroy(JNIEnv* env);
-
+  Isolate* getIsolate();
+  Handle<Context>& getContext();
   friend class V8Value;
+  friend class V8Exception;
 };
 
 } // namespace jv8
