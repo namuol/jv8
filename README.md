@@ -23,3 +23,5 @@ long sum = v8.run("javaAdd(6, 3, 12, 17, 4);").toNumber();
 
 // sum == 42
 ```
+
+Currently, only the Android platform is supported, but I intend to support major desktop platforms as well (Linux/Windows/OS X).
