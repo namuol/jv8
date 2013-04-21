@@ -75,6 +75,7 @@ public class JV8Test extends Activity {
     }
     
     v8.map(new TestMappableMethod(), "sayHello");
-    v8.tryRunJS("sayHello('Testing', 1, 2, 3, [42,43,44], {hi:'wat', x:1042, NO:'U'});");
+    V8Value result = v8.tryRunJS("sayHello('Testing', 1, 2, 3, [42,43,44], {hi:'wat', x:1042, NO:'U'});");
+    Log.i("onCreate", result.toString());
   }
 }

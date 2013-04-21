@@ -35,7 +35,7 @@ registerCallback (const Arguments& args) {
 
   MappableMethodData* data = (MappableMethodData*) External::Cast(*args.Data())->Value();
   JNIEnv* env;
-  jint result = data->jvm->AttachCurrentThread(&env, NULL);
+  data->jvm->AttachCurrentThread(&env, NULL);
   jobject methodObject = data->methodObject;
   jclass V8MappableMethod_class = env->GetObjectClass(methodObject);
   if (!m_V8MappableMethod_methodToRun) {
@@ -59,9 +59,9 @@ registerCallback (const Arguments& args) {
   }
 
   jobject jresult = env->CallObjectMethod(methodObject, m_V8MappableMethod_methodToRun, jargs);
+  V8Value* result = (V8Value*) env->GetLongField(jresult, f_V8Value_handle);
 
-  // TODO Handle return value from Java.
-  return Undefined();
+  return result->getValue();
 }
 
 } // namespace jv8
