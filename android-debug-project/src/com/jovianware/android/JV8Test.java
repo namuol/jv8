@@ -1,9 +1,11 @@
 package com.jovianware.android;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.jovianware.jv8.V8Exception;
 import com.jovianware.jv8.V8MappableMethod;
@@ -34,8 +36,8 @@ public class JV8Test extends Activity {
   class TestMappableMethod implements V8MappableMethod {
     @Override
     public V8Value methodToRun(V8Value[] args) {
-      Log.e("methodToRun", "Hello from Java!");
-      Log.e("methodToRun", "Arguments:");
+      Log.i("methodToRun", "Hello from Java!");
+      Log.i("methodToRun", "Arguments:");
       for (V8Value val : args) {
         if (val.isArray()) {
           // The ordinary `toString` method works fine on Arrays, but
@@ -44,9 +46,16 @@ public class JV8Test extends Activity {
           List<V8Value> vals = Arrays.asList(val.toArray());
           str += join(vals, ", ");
           str += "]";
-          Log.e("methodToRun", str);
+          Log.i("methodToRun", str);
+        } else if (val.isObject()) {
+          Map<String,V8Value> map = val.toObject();
+          List<String> vals = new ArrayList<String>();
+          for (String key : map.keySet()) {
+            vals.add(key + ": " + map.get(key)); 
+          }
+          Log.i("methodToRun", "{" + join(vals, ", ") + "}");
         } else {
-          Log.e("methodToRun", val.toString());
+          Log.i("methodToRun", val.toString());
         }
       }
       return v8.val("TESTING RETURN VAL");
@@ -66,6 +75,6 @@ public class JV8Test extends Activity {
     }
     
     v8.map(new TestMappableMethod(), "sayHello");
-    v8.tryRunJS("sayHello('Testing', 1, 2, 3, [42,43,44]);");
+    v8.tryRunJS("sayHello('Testing', 1, 2, 3, [42,43,44], {hi:'wat', x:1042, NO:'U'});");
   }
 }

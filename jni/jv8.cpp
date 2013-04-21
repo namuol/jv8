@@ -142,8 +142,18 @@ static void V8Value_init_str (
 ) {
   V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
   const char* cstr = env->GetStringUTFChars(jstr, NULL);
-  env->SetLongField(obj, f_V8Value_handle, (jlong) new V8Value(runner, cstr)); 
+  env->SetLongField(obj, f_V8Value_handle, (jlong) new V8Value(runner, cstr));
   env->ReleaseStringUTFChars(jstr, cstr);
+}
+
+static void V8Value_init_object (
+  JNIEnv *env,
+  jobject obj,
+  jobject jrunner,
+  jobject jmap
+) {
+  V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
+  // TODO
 }
 
 static jboolean V8Value_isArray (
@@ -176,6 +186,14 @@ static jboolean V8Value_isString (
 ) {
   V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
   return val->getValue()->IsString();
+}
+
+static jboolean V8Value_isObject (
+  JNIEnv *env,
+  jobject obj
+) {
+  V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
+  return val->getValue()->IsObject();
 }
 
 static jobjectArray V8Value_toArray (
@@ -233,6 +251,53 @@ static jstring V8Value_toString (
   return env->NewStringUTF(*String::Utf8Value(val->getValue()->ToString()));
 }
 
+static jobject V8Value_toObject (
+  JNIEnv *env,
+  jobject obj
+) {
+  V8Value* val = (V8Value*) env->GetLongField(obj, f_V8Value_handle);
+
+  // We have to setup an isolate context here, perhaps because ToString actually performs some JS 
+  //  magic behind the scenes to coerce the `Value` into a String.
+  V8Runner* runner = val->getRunner();
+  Isolate* isolate = runner->getIsolate();
+  Handle<Context>& context = runner->getContext();
+  Locker l(isolate);
+  Isolate::Scope isolateScope(isolate);
+
+  HandleScope handle_scope;
+
+  Context::Scope context_scope(context);
+
+  if (!val ||
+      val->getValue().IsEmpty() ||
+      !val->getValue()->IsObject() )
+  {
+    return NULL;
+  }
+
+  jclass mapClass = env->FindClass("java/util/HashMap");
+  jclass V8Value_class = env->FindClass("com/jovianware/jv8/V8Value");
+  
+  jmethodID put = env->GetMethodID(mapClass, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+
+  Handle<Object> jsObj = val->getValue()->ToObject();
+
+  jmethodID init = env->GetMethodID(mapClass, "<init>", "()V");
+  jobject hashMap = env->NewObject(mapClass, init);
+  Handle<Array> properties = jsObj->GetPropertyNames();
+
+  for (int i=0; i<properties->Length(); ++i) {
+    Handle<Value> propName = properties->Get(i);
+    jstring jpropName = env->NewStringUTF(*String::Utf8Value(propName->ToString()));
+    jobject jprop = env->NewObject(V8Value_class, m_V8Value_init_internal);
+    env->SetLongField(jprop, f_V8Value_handle, (jlong) new V8Value(runner, jsObj->Get(propName)));
+    env->CallObjectMethod(hashMap, put, jpropName, jprop);
+  }
+
+  return hashMap;
+}
+
 static void V8Value_dispose (
   JNIEnv *env,
   jobject obj
@@ -254,15 +319,18 @@ static JNINativeMethod V8Value_Methods[] = {
   {"init", "(Lcom/jovianware/jv8/V8Runner;[Lcom/jovianware/jv8/V8Value;)V", (void *) jv8::V8Value_init_array},
   {"init", "(Lcom/jovianware/jv8/V8Runner;D)V", (void *) jv8::V8Value_init_num},
   {"init", "(Lcom/jovianware/jv8/V8Runner;Ljava/lang/String;)V", (void *) jv8::V8Value_init_str},
-  {"dispose", "()V", (void *) jv8::V8Value_dispose},
+  {"init", "(Lcom/jovianware/jv8/V8Runner;Ljava/util/Map;)V", (void *) jv8::V8Value_init_object},
   {"isArray", "()Z", (void *) jv8::V8Value_isArray},
   {"isBoolean", "()Z", (void *) jv8::V8Value_isBoolean},
   {"isNumber", "()Z", (void *) jv8::V8Value_isNumber},
   {"isString", "()Z", (void *) jv8::V8Value_isString},
+  {"isObject", "()Z", (void *) jv8::V8Value_isObject},
   {"toArray", "()[Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Value_toArray},
   {"toNumber", "()D", (void *) jv8::V8Value_toNumber},
   {"toBoolean", "()Z", (void *) jv8::V8Value_toBoolean},
-  {"toString", "()Ljava/lang/String;", (void *) jv8::V8Value_toString}
+  {"toString", "()Ljava/lang/String;", (void *) jv8::V8Value_toString},
+  {"toObject", "()Ljava/util/Map;", (void *) jv8::V8Value_toObject},
+  {"dispose", "()V", (void *) jv8::V8Value_dispose}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////
