@@ -9,7 +9,7 @@ using namespace v8;
 #include "jv8.h"
 
 // TODO: Integrate this in with build system:
-#define NDK_GDB_ENTRYPOINT_WAIT_HACK
+//#define NDK_GDB_ENTRYPOINT_WAIT_HACK
 
 namespace jv8 {
 
@@ -77,8 +77,8 @@ static void V8Runner_destroy (
 static void V8Runner_map (
   JNIEnv *env,
   jobject jrunner,
-  jobject jmappableMethod,
-  jstring jname
+  jstring jname,
+  jobject jmappableMethod
 ) {
   V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
   const char* name = env->GetStringUTFChars(jname, NULL);
@@ -311,7 +311,7 @@ static JNINativeMethod V8Runner_Methods[] = {
   {"create", "()J", (void *) jv8::V8Runner_create},
   {"dispose", "()V", (void *) jv8::V8Runner_destroy},
   {"runJS", "(Ljava/lang/String;)Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Runner_runJS},
-  {"map", "(Lcom/jovianware/jv8/V8MappableMethod;Ljava/lang/String;)V", (void *) jv8::V8Runner_map},
+  {"map", "(Ljava/lang/String;Lcom/jovianware/jv8/V8MappableMethod;)V", (void *) jv8::V8Runner_map},
 };
 
 static JNINativeMethod V8Value_Methods[] = {

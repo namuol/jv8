@@ -121,7 +121,10 @@ checkForErrors
 
 msg Building v8 for android target...
 pushd $V8_SRC_ROOT
-make dependencies -j$NUM_CPUS
+if [ ! -d "./build/gyp" ]
+then
+  make dependencies -j$NUM_CPUS
+fi
 make $V8_TARGET -j$NUM_CPUS
 checkForErrors
 popd

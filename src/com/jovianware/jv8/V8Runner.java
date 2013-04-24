@@ -28,7 +28,7 @@ public class V8Runner {
     }
   }
   
-  public native void map(V8MappableMethod m, String name);
+  public native void map(String name, V8MappableMethod m);
   
   private long handle;
 

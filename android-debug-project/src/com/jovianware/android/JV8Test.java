@@ -18,7 +18,8 @@ import android.util.Log;
 
 public class JV8Test extends Activity {
   private V8Runner v8;
-  
+  private final static String LOGTAG = "com.jovianware.android";
+
   // It's 2013, and Java still doesn't have a join() method in any of its standard utilities.
   static String join(Collection<?> s, String delimiter) {
     StringBuilder builder = new StringBuilder();
@@ -36,8 +37,8 @@ public class JV8Test extends Activity {
   class TestMappableMethod implements V8MappableMethod {
     @Override
     public V8Value methodToRun(V8Value[] args) {
-      Log.i("methodToRun", "Hello from Java!");
-      Log.i("methodToRun", "Arguments:");
+      Log.i(LOGTAG, "Hello from Java!");
+      Log.i(LOGTAG, "Arguments:");
       for (V8Value val : args) {
         if (val.isArray()) {
           // The ordinary `toString` method works fine on Arrays, but
@@ -46,16 +47,16 @@ public class JV8Test extends Activity {
           List<V8Value> vals = Arrays.asList(val.toArray());
           str += join(vals, ", ");
           str += "]";
-          Log.i("methodToRun", str);
+          Log.i(LOGTAG, str);
         } else if (val.isObject()) {
           Map<String,V8Value> map = val.toObject();
           List<String> vals = new ArrayList<String>();
           for (String key : map.keySet()) {
             vals.add(key + ": " + map.get(key)); 
           }
-          Log.i("methodToRun", "{" + join(vals, ", ") + "}");
+          Log.i(LOGTAG, "{" + join(vals, ", ") + "}");
         } else {
-          Log.i("methodToRun", val.toString());
+          Log.i(LOGTAG, val.toString());
         }
       }
       return v8.val("TESTING RETURN VAL");
@@ -71,11 +72,11 @@ public class JV8Test extends Activity {
     try {
       v8.runJS("42;\n42+1;\nsomethingUndefined.runMe()");
     } catch (V8Exception e) {
-      Log.e("V8Exception", e.getMessage());
+      Log.e(LOGTAG, e.getMessage());
     }
     
-    v8.map(new TestMappableMethod(), "sayHello");
+    v8.map("sayHello", new TestMappableMethod());
     V8Value result = v8.tryRunJS("sayHello('Testing', 1, 2, 3, [42,43,44], {hi:'wat', x:1042, NO:'U'});");
-    Log.i("onCreate", result.toString());
+    Log.i(LOGTAG, result.toString());
   }
 }
