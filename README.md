@@ -19,7 +19,7 @@ class NumberAdder implements V8MappableMethod {
 
 V8Runner v8 = new V8Runner();
 v8.map("javaAdd", new NumberAdder());
-long sum = v8.run("javaAdd(6, 3, 12, 17, 4);").toNumber();
+long sum = v8.runJS("javaAdd(6, 3, 12, 17, 4);").toNumber();
 
 // sum == 42
 ```
