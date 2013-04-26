@@ -30,6 +30,7 @@ static jobject V8Runner_runJS (
 
     env->ReleaseStringUTFChars(jstr, js);
     env->ThrowNew(V8Exception_class, "Unexpected Error running JS");
+    env->DeleteLocalRef(V8Exception_class);
     return 0;
   }
   
@@ -48,12 +49,15 @@ static jobject V8Runner_runJS (
 
     env->ReleaseStringUTFChars(jstr, js);
     env->ThrowNew(V8Exception_class, *String::Utf8Value(exception->getMessage()->ToString()));
+    env->DeleteLocalRef(V8Exception_class);
     return 0;
   }
 
   jclass V8Value_class = env->FindClass("com/jovianware/jv8/V8Value");
   jobject wrappedReturnValue = env->NewObject(V8Value_class, m_V8Value_init_internal);
   env->SetLongField(wrappedReturnValue, f_V8Value_handle, (jlong) returnValue);
+
+  env->DeleteLocalRef(V8Value_class);
 
   env->ReleaseStringUTFChars(jstr, js);
   return wrappedReturnValue;
@@ -153,7 +157,36 @@ static void V8Value_init_object (
   jobject jmap
 ) {
   V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
-  // TODO
+  
+  /*
+  // TODO DO WE NEED THIS?
+  // Isolate* isolate = runner->getIsolate();
+  // Handle<Context>& context = runner->getContext();
+  // Locker l(isolate);
+  // Isolate::Scope isolateScope(isolate);
+
+  // HandleScope handle_scope;
+
+  // Context::Scope context_scope(context);
+
+  jclass mapClass = env->FindClass("java/util/HashMap");
+  jclass setClass = env->FindClass("java/util/Set");
+  jclass V8Value_class = env->FindClass("com/jovianware/jv8/V8Value");
+
+  jmethodID get_m = env->GetMethodID(mapClass, "get", "()Ljava/lang/Object;");
+  jmethodID keySet_m = env->GetMethodID(mapClass, "keySet", "()Ljava/util/Set;");
+  jmethodID toArray_m = env->GetMethodID(setClass, "toArray", "()[Ljava/lang/Object;");
+  
+  jstring jpropName = env->NewStringUTF(*String::Utf8Value(propName->ToString()));
+  jobject keySet = env->CallObjectMethod(jmap, keySet_m);
+  jobject keys = env->CallObjectMethod(keySet, toArray_m);
+
+  int len = env->GetArrayLength(keys);
+  for (int i=0; i<len; ++i) {
+    jstring key = env->GetObjectArrayElement(keys, i);
+    jobject v8val = env->CallObjectMethod(jmap, get_m, key);
+  }
+  */
 }
 
 static jboolean V8Value_isArray (
@@ -210,7 +243,10 @@ static jobjectArray V8Value_toArray (
     jobject wrappedValue = env->NewObject(V8Value_class, m_V8Value_init_internal);
     env->SetLongField(wrappedValue, f_V8Value_handle, (jlong) new V8Value(runner, array->Get(i)));
     env->SetObjectArrayElement(jarray, i, wrappedValue);
+    env->DeleteLocalRef(wrappedValue);
   }
+
+  env->DeleteLocalRef(V8Value_class);
   return jarray;
 }
 
@@ -293,7 +329,12 @@ static jobject V8Value_toObject (
     jobject jprop = env->NewObject(V8Value_class, m_V8Value_init_internal);
     env->SetLongField(jprop, f_V8Value_handle, (jlong) new V8Value(runner, jsObj->Get(propName)));
     env->CallObjectMethod(hashMap, put, jpropName, jprop);
+    env->DeleteLocalRef(jpropName);
+    env->DeleteLocalRef(jprop);
   }
+
+  env->DeleteLocalRef(mapClass);
+  env->DeleteLocalRef(V8Value_class);
 
   return hashMap;
 }

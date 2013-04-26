@@ -37,9 +37,10 @@ registerCallback (const Arguments& args) {
   JNIEnv* env;
   data->jvm->AttachCurrentThread(&env, NULL);
   jobject methodObject = data->methodObject;
-  jclass V8MappableMethod_class = env->GetObjectClass(methodObject);
   if (!m_V8MappableMethod_methodToRun) {
+    jclass V8MappableMethod_class = env->GetObjectClass(methodObject);
     m_V8MappableMethod_methodToRun = env->GetMethodID(V8MappableMethod_class, "methodToRun", "([Lcom/jovianware/jv8/V8Value;)Lcom/jovianware/jv8/V8Value;");
+    env->DeleteLocalRef(V8MappableMethod_class);
   }
 
   jclass V8Value_class = env->FindClass("com/jovianware/jv8/V8Value");
@@ -56,9 +57,13 @@ registerCallback (const Arguments& args) {
     jobject wrappedArg = env->NewObject(V8Value_class, m_V8Value_init_internal);
     env->SetLongField(wrappedArg, f_V8Value_handle, (jlong) new V8Value(data->runner, args[i]));
     env->SetObjectArrayElement(jargs, i, wrappedArg);
+    env->DeleteLocalRef(wrappedArg);
   }
 
   jobject jresult = env->CallObjectMethod(methodObject, m_V8MappableMethod_methodToRun, jargs);
+  env->DeleteLocalRef(jargs);
+  env->DeleteLocalRef(V8Value_class);
+
   V8Value* result = (V8Value*) env->GetLongField(jresult, f_V8Value_handle);
 
   return result->getValue();

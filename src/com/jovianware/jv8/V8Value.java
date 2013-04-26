@@ -43,5 +43,7 @@ public class V8Value {
   public V8Value(V8Runner runner, long num) { init(runner, num); }
   public V8Value(V8Runner runner, double num) { init(runner, num); }
   public V8Value(V8Runner runner, String str) { init(runner, str); }
+  public V8Value(V8Runner runner, Map<String, V8Value> object) { init(runner, object); }
   public void finalize() { dispose(); }
+  
 }

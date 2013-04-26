@@ -37,6 +37,12 @@ V8Value::V8Value (V8Runner* _runner, Handle<Value> _val) {
 }
 
 V8Value::~V8Value () {
+  Locker l(runner->isolate);
+  Isolate::Scope isolateScope(runner->isolate);
+
+  HandleScope handle_scope;
+
+  Context::Scope context_scope(runner->context);
   val.Dispose(runner->isolate);
 }
 

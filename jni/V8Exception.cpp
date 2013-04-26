@@ -25,6 +25,13 @@ V8Exception::V8Exception (V8Runner* _runner, const TryCatch& tryCatch) {
 }
 
 V8Exception::~V8Exception () {
+  Locker l(runner->isolate);
+  Isolate::Scope isolateScope(runner->isolate);
+
+  HandleScope handle_scope;
+
+  Context::Scope context_scope(runner->context);
+
   message.Dispose(runner->isolate);
   stackTrace.Dispose(runner->isolate);
 }

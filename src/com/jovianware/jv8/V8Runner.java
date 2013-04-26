@@ -2,6 +2,11 @@ package com.jovianware.jv8;
 
 
 public class V8Runner {
+  private V8Value Undefined_;
+  public V8Value Undefined() {
+    return Undefined_;
+  }
+  
   static {
     System.loadLibrary("gnustl_shared");
     System.loadLibrary("jv8");
@@ -31,8 +36,8 @@ public class V8Runner {
   public native void map(String name, V8MappableMethod m);
   
   private long handle;
-
   public V8Runner() {
     handle = create();
+    Undefined_ = new V8Value(this);
   }
 }
