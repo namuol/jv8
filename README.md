@@ -40,6 +40,7 @@ You need to be able to build V8 for Android.
 ### Instructions
 First, you must initialize and pull down the v8 git submodule:
 ```
+# From the root of the project folder:
 git submodule init
 git submodule update # This will take a while.
 ```
