@@ -27,6 +27,20 @@ Currently, only the Android platform is supported, but I intend to support major
 
 This **pre-alpha** software still in highly experimental stages.
 
+## Binaries
+A nightly(ish) build can be downloaded [here](https://s3.amazonaws.com/static.jovianware.com/jv8/jv8.tar.gz).
+
+The tarball should be extracted into the root of a standard android project, and contains the following:
+
+    libs/
+      jv8.jar
+      armeabi/
+        gdbserver # FOR DEBUG
+        gdb.setup # FOR DEBUG
+        libgnustl_shared.so
+        libjv8.so
+
+Note: These are debug-only builds for now; i.e. not-optimized and containing debug symbols.
 
 ## Building
 
