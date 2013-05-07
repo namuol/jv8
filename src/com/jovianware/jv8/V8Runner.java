@@ -13,15 +13,19 @@ public class V8Runner {
   }
   
   public V8Value val(String str) {
-    return new V8Value(this, str);
+    return new V8String(str);
   }
   
   public V8Value val(double num) {
-    return new V8Value(this, num);
+    return new V8Number(num);
+  }
+  
+  public V8Value val(boolean bool) {
+    return new V8Boolean(bool);
   }
   
   private native long create();
-  public native void dispose();
+  private native void dispose();
   
   public native V8Value runJS(String src) throws V8Exception;
   
@@ -33,11 +37,16 @@ public class V8Runner {
     }
   }
   
+  @Override
+  public void finalize() {
+    dispose();
+  }
+  
   public native void map(String name, V8MappableMethod m);
   
   private long handle;
   public V8Runner() {
     handle = create();
-    Undefined_ = new V8Value(this);
+    Undefined_ = new V8Undefined();
   }
 }

@@ -12,7 +12,7 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := jv8
-LOCAL_SRC_FILES := jv8.cpp V8Runner.cpp V8Value.cpp V8Exception.cpp $(wildcard $(LOCAL_PATH)/../support/v8/src/*.cpp)
+LOCAL_SRC_FILES := jv8.cpp V8Runner.cpp $(wildcard $(LOCAL_PATH)/../support/v8/src/*.cpp)
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../support/include
 LOCAL_STATIC_LIBRARIES := v8_base v8_nosnapshot
 include $(BUILD_SHARED_LIBRARY)

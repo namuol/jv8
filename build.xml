@@ -21,7 +21,7 @@
     </target>
     <target name="clean">
         <delete dir="bin"/>
-        <delete dir="dist"/>
+        <delete dir="_dist"/>
     </target>
     <target depends="clean" name="cleanall"/>
     <target depends="build-subprojects,build-project" name="build"/>
@@ -33,8 +33,8 @@
             <classpath refid="jv8.classpath"/>
         </javac>
     </target>
-    <target depends="build" name="dist" description="Create dist/jv8.jar">
-        <jar jarfile="dist/jv8.jar" includes="**/*.class" basedir="bin"/>
+    <target depends="build" name="dist" description="Create _dist/jv8.jar">
+        <jar jarfile="_dist/libs/jv8.jar" includes="**/*.class" basedir="bin"/>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
 </project>

@@ -1,11 +1,7 @@
 package com.jovianware.android;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import com.jovianware.jv8.V8Exception;
 import com.jovianware.jv8.V8MappableMethod;
@@ -19,6 +15,7 @@ import android.util.Log;
 public class JV8Test extends Activity {
   private V8Runner v8;
   private final static String LOGTAG = "com.jovianware.android";
+  private static final int TEST_INSTANCE_COUNT = 5;
 
   // It's 2013, and Java still doesn't have a join() method in any of its standard utilities.
   static String join(Collection<?> s, String delimiter) {
@@ -40,24 +37,7 @@ public class JV8Test extends Activity {
       Log.i(LOGTAG, "Hello from Java!");
       Log.i(LOGTAG, "Arguments:");
       for (V8Value val : args) {
-        if (val.isArray()) {
-          // The ordinary `toString` method works fine on Arrays, but
-          //  I wanted to illustrate that `toArray` works well on its own. 
-          String str = "[";
-          List<V8Value> vals = Arrays.asList(val.toArray());
-          str += join(vals, ", ");
-          str += "]";
-          Log.i(LOGTAG, str);
-        } else if (val.isObject()) {
-          Map<String,V8Value> map = val.toObject();
-          List<String> vals = new ArrayList<String>();
-          for (String key : map.keySet()) {
-            vals.add(key + ": " + map.get(key)); 
-          }
-          Log.i(LOGTAG, "{" + join(vals, ", ") + "}");
-        } else {
-          Log.i(LOGTAG, val.toString());
-        }
+        Log.i(LOGTAG, val.toString());
       }
       return v8.val("TESTING RETURN VAL");
     }
@@ -66,17 +46,38 @@ public class JV8Test extends Activity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    
     setContentView(R.layout.main);
     v8 = new V8Runner();
-    
     try {
-      v8.runJS("42;\n42+1;\nsomethingUndefined.runMe()");
+      v8.runJS(
+        "42;\n" +
+        "42+1;\n" +
+        "somethingUndefined.runMe()"
+      );
     } catch (V8Exception e) {
       Log.e(LOGTAG, e.getMessage());
     }
     
     v8.map("sayHello", new TestMappableMethod());
-    V8Value result = v8.tryRunJS("sayHello('Testing', 1, 2, 3, [42,43,44], {hi:'wat', x:1042, NO:'U'});");
+    V8Value result = v8.tryRunJS("sayHello('Testing', 1, 2, 3);");
     Log.i(LOGTAG, result.toString());
+    
+    
+    for (int i = 0; i < TEST_INSTANCE_COUNT; ++i) {
+      // Test multiple instances:
+      V8Runner testInstance = new V8Runner();
+
+      try {
+        // This wont work because `sayHello` was only
+        // defined for the other V8Runner context.
+        testInstance.runJS("sayHello('This wont work.');");
+      } catch (V8Exception e) {
+        Log.e(LOGTAG, e.getMessage());
+      }
+      
+      // GC can clean up `testInstance` now.
+    }
+    
   }
 }

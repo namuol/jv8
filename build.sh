@@ -170,3 +170,11 @@ checkForErrors "Problem building JNI module."
 # fi
 
 ant dist
+checkForErrors "Problem running 'ant dist'"
+
+mkdir -p _dist
+cp -r libs _dist
+checkForErrors "Problem copying complete binaries to dist"
+
+mkdir -p dist
+tar czf dist/jv8.tar.gz _dist
