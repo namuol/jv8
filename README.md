@@ -3,30 +3,42 @@
 A simple way to run V8 JavaScript instances from Java.
 
 ```java
-class NumberAdder implements V8MappableMethod {
+V8Runner v8 = new V8Runner();
+
+v8.map("javaSum", new V8MappableMethod {
   @Override
   public V8Value methodToRun(V8Value[] args) {
-    long sum = 0;
+    double sum = 0;
     for (V8Value val : args) {
       sum += val.toNumber();
     }
-    return new V8Value(sum);
+    return new v8.val(sum);
   }
-}
+});
 
-// ...
+double sum = v8.runJS("javaSum(6, 3, 12, 17, 4);").toNumber();
 
-V8Runner v8 = new V8Runner();
-v8.map("javaAdd", new NumberAdder());
-long sum = v8.runJS("javaAdd(6, 3, 12, 17, 4);").toNumber();
-
-// sum == 42
+// sum == 42.0
 ```
 
 Currently, only the Android platform is supported, but I intend to support major desktop platforms as well (Linux/Windows/OS X).
 
-This **pre-alpha** software still in highly experimental stages.
+This **pre-alpha** software still in highly experimental stages. **Do not use this in production software.**
 
+## Binaries
+A nightly(ish) build can be downloaded [here](https://s3.amazonaws.com/static.jovianware.com/jv8/jv8.tar.gz).
+
+The tarball should be extracted into the root of a standard android project, and contains the following:
+
+    libs/
+      jv8.jar
+      armeabi/
+        gdbserver # FOR DEBUG
+        gdb.setup # FOR DEBUG
+        libgnustl_shared.so
+        libjv8.so
+
+Note: These are debug-only builds for now; i.e. not-optimized and containing debug symbols.
 
 ## Building
 
