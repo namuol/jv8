@@ -20,7 +20,7 @@ namespace jv8 {
   if (!tryCatch.HasCaught()) {\
     env->ThrowNew(V8Exception_class, "Unexpected Error running JS");\
   } else {\
-    Persistent<Value> ex = Persistent<Value>::New(isolate, tryCatch.Exception());\
+    Persistent<Value> ex = Persistent<Value>::New(isolate, tryCatch.StackTrace());\
     env->ThrowNew(V8Exception_class, *String::Utf8Value(ex->ToString()));\
     ex.Dispose(isolate);\
   }\

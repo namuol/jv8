@@ -105,7 +105,12 @@ newV8Value (
 
   jobject wrappedReturnValue;
 
-  if (value->IsString()) {
+  if (value->IsNumber()) {
+    wrappedReturnValue = env->NewObject(V8Number_class,
+      m_V8Number_init_num,
+      value->NumberValue()
+    );
+  } else if (value->IsString()) {
     wrappedReturnValue = env->NewObject(V8String_class,
       m_V8String_init_str,
       env->NewStringUTF( *String::Utf8Value(value->ToString()) )
@@ -115,11 +120,8 @@ newV8Value (
       m_V8Boolean_init_bool,
       value->BooleanValue()
     );
-  } else /*if (value->IsNumber())*/ {
-    wrappedReturnValue = env->NewObject(V8Number_class,
-      m_V8Number_init_num,
-      value->NumberValue()
-    );
+  } else {
+    wrappedReturnValue = NULL;
   }
 
   return wrappedReturnValue;
