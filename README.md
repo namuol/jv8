@@ -26,7 +26,7 @@ Currently, only the Android platform is supported, but I intend to support major
 This **pre-alpha** software still in highly experimental stages. **Do not use this in production software.**
 
 ## Binaries
-A nightly(ish) build can be downloaded [here](https://s3.amazonaws.com/static.jovianware.com/jv8/jv8.tar.gz).
+A nightly(ish) build can be downloaded [here](http://static.jovianware.com/jv8/jv8.tar.gz).
 
 The tarball should be extracted into the root of a standard android project, and contains the following:
 
