@@ -62,13 +62,15 @@ Now use the (hackish) build script to create everything you need:
 ./build.sh -j4 # Use the `-h` flag to see options
 ```
 
-Have a snack while you wait. This will result in 3 key files:
+Have a snack while you wait. This will result in 3 essential files:
 ```
-dist/
-  jv8.jar
-libs/armeabi/
-  libgnustl_shared.so
-  libjv8.so
+  dist/
+    jv8.tar.gz/
+      libs/
+        jv8.jar               # Java code
+        armeabi/
+          libgnustl_shared.so # Android C++ STL support 
+          libjv8.so           # JV8 JNI code
 ```
 
 There will also be GDB stuff in here; the build script does not generate production
