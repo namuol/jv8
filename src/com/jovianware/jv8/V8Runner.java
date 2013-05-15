@@ -12,6 +12,8 @@ public class V8Runner {
     System.loadLibrary("jv8");
   }
   
+  public static native void setDebuggingRunner(V8Runner v8);
+  
   public V8Value val(String str) {
     return new V8String(str);
   }
@@ -27,11 +29,11 @@ public class V8Runner {
   private native long create();
   private native void dispose();
   
-  public native V8Value runJS(String src) throws V8Exception;
+  public native V8Value runJS(String name, String src) throws V8Exception;
   
-  public V8Value tryRunJS(String src) {
+  public V8Value tryRunJS(String name, String src) {
     try {
-      return runJS(src);
+      return runJS(name, src);
     } catch (V8Exception e) {
       return null;
     }

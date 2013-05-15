@@ -25,10 +25,24 @@ namespace jv8 {
     ex.Dispose(isolate);\
   }\
 
+static void V8Runner_setDebuggingRunner (
+  JNIEnv *env,
+  jclass V8runner_class,
+  jobject jrunner
+) {
+  V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
+  if (runner != NULL)  {
+    setDebuggingRunner(runner);
+  } else {
+    disableDebugging();
+  }
+}
+
 static jobject V8Runner_runJS (
   JNIEnv *env,
   jobject jrunner,
-  jstring jstr
+  jstring jname,
+  jstring jjs
 ) {
   V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
 
@@ -41,17 +55,19 @@ static jobject V8Runner_runJS (
 
   Context::Scope context_scope(context);
 
-  const char* js = env->GetStringUTFChars(jstr, NULL);
+  const char* js = env->GetStringUTFChars(jjs, NULL);
+  const char* name = env->GetStringUTFChars(jname, NULL);
 
   // Create a string containing the JavaScript source code.
   Handle<String> source = String::New(js);
 
-  env->ReleaseStringUTFChars(jstr, js);
+  env->ReleaseStringUTFChars(jjs, js);
 
   TryCatch tryCatch;
 
   // Compile the source code.
-  Handle<Script> script = Script::Compile(source, String::New("program"));
+  Handle<Script> script = Script::Compile(source, String::New(name));
+  env->ReleaseStringUTFChars(jname, name);
   
   Handle<Value> result;
 
@@ -106,8 +122,9 @@ static void V8Runner_map (
 static JNINativeMethod V8Runner_Methods[] = {
   {"create", "()J", (void *) jv8::V8Runner_create},
   {"dispose", "()V", (void *) jv8::V8Runner_dispose},
-  {"runJS", "(Ljava/lang/String;)Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Runner_runJS},
+  {"runJS", "(Ljava/lang/String;Ljava/lang/String;)Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Runner_runJS},
   {"map", "(Ljava/lang/String;Lcom/jovianware/jv8/V8MappableMethod;)V", (void *) jv8::V8Runner_map},
+  {"setDebuggingRunner", "(Lcom/jovianware/jv8/V8Runner;)V", (void *) jv8::V8Runner_setDebuggingRunner}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////

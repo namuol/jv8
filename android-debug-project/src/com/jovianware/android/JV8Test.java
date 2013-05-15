@@ -50,7 +50,7 @@ public class JV8Test extends Activity {
     setContentView(R.layout.main);
     v8 = new V8Runner();
     try {
-      v8.runJS(
+      v8.runJS("(program)",
         "42;\n" +
         "42+1;\n" +
         "somethingUndefined.runMe()"
@@ -60,7 +60,7 @@ public class JV8Test extends Activity {
     }
     
     v8.map("sayHello", new TestMappableMethod());
-    V8Value result = v8.tryRunJS("sayHello('Testing', 1, 2, 3);");
+    V8Value result = v8.tryRunJS("(program)", "sayHello('Testing', 1, 2, 3);");
     Log.i(LOGTAG, result.toString());
     
     
@@ -71,7 +71,7 @@ public class JV8Test extends Activity {
       try {
         // This wont work because `sayHello` was only
         // defined for the other V8Runner context.
-        testInstance.runJS("sayHello('This wont work.');");
+        testInstance.runJS("(program)", "sayHello('This wont work.');");
       } catch (V8Exception e) {
         Log.e(LOGTAG, e.getMessage());
       }
