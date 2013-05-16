@@ -16,7 +16,7 @@ v8.map("javaSum", new V8MappableMethod {
   }
 });
 
-double sum = v8.runJS("javaSum(6, 3, 12, 17, 4);").toNumber();
+double sum = v8.runJS("(program)", "javaSum(6, 3, 12, 17, 4);").toNumber();
 
 // sum == 42.0
 ```
