@@ -1,3 +1,5 @@
+#include <sys/types.h>
+
 #include <vector>
 using namespace std;
 
@@ -40,7 +42,7 @@ void V8Runner::mapMethod (JNIEnv* env,  jobject v8MappableMethod, const char* na
 }
 
 void V8Runner::destroy (JNIEnv* env) {
-  for (int i=0; i<methodDatas.size(); ++i) {
+  for (uint i=0; i<methodDatas.size(); ++i) {
     env->DeleteGlobalRef(methodDatas[i]->methodObject);
     delete methodDatas[i];
   }

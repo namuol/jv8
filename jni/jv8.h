@@ -138,7 +138,7 @@ registerCallback (const Arguments& args) {
 
   MappableMethodData* data = (MappableMethodData*) External::Cast(*args.Data())->Value();
   JNIEnv* env;
-  data->jvm->AttachCurrentThread(&env, NULL);
+  data->jvm->AttachCurrentThread((void**)&env, NULL);
   
   if (needsToCacheClassData) {
     cacheClassData(env);

@@ -120,11 +120,11 @@ static void V8Runner_map (
 } // namespace jv8
 
 static JNINativeMethod V8Runner_Methods[] = {
-  {"create", "()J", (void *) jv8::V8Runner_create},
-  {"dispose", "()V", (void *) jv8::V8Runner_dispose},
-  {"runJS", "(Ljava/lang/String;Ljava/lang/String;)Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Runner_runJS},
-  {"map", "(Ljava/lang/String;Lcom/jovianware/jv8/V8MappableMethod;)V", (void *) jv8::V8Runner_map},
-  {"setDebuggingRunner", "(Lcom/jovianware/jv8/V8Runner;)V", (void *) jv8::V8Runner_setDebuggingRunner}
+  {(char*)"create", (char*)"()J", (void *) jv8::V8Runner_create},
+  {(char*)"dispose", (char*)"()V", (void *) jv8::V8Runner_dispose},
+  {(char*)"runJS", (char*)"(Ljava/lang/String;Ljava/lang/String;)Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Runner_runJS},
+  {(char*)"map", (char*)"(Ljava/lang/String;Lcom/jovianware/jv8/V8MappableMethod;)V", (void *) jv8::V8Runner_map},
+  {(char*)"setDebuggingRunner", (char*)"(Lcom/jovianware/jv8/V8Runner;)V", (void *) jv8::V8Runner_setDebuggingRunner}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////

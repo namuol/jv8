@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="custom_rules">
+  <property environment="env" />
+
+  <target name="-pre-build">
+    <exec executable="${env.ANDROID_NDK_ROOT}/ndk-build" failonerror="true"/>
+
+    <!-- We copy over the gdx.jar to the Android project's libs directory
+       because all attempts to reference to JARs in external directories
+       were unsuccessful. This isn't quite as pretty but it works!
+       Ignoring the copied JAR in version control removes problems with
+       duplication. -->
+    <copy todir="libs" verbose="${verbose}">
+      <fileset dir="${root.dir}/main/libs" includes="jv8.jar" />
+    </copy>
+    <copy todir="libs/armeabi" verbose="${verbose}">
+      <fileset dir="${root.dir}/android/support/jv8/armeabi" includes="libgnustl_shared.so,libjv8.so" />
+    </copy>
+    <copy todir="libs/armeabi-v7a" verbose="${verbose}">
+      <fileset dir="${root.dir}/android/support/jv8/armeabi-v7a" includes="libgnustl_shared.so,libjv8.so" />
+    </copy>
+  </target>
+
+  <target name="clean" depends="android_rules.clean">
+    <exec executable="${env.ANDROID_NDK_ROOT}/ndk-build" failonerror="true">
+        <arg value="clean"/>
+    </exec>
+    <delete dir="${root.dir}/android/libs" />
+  </target>
+</project>

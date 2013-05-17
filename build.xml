@@ -34,7 +34,7 @@
         </javac>
     </target>
     <target depends="build" name="dist" description="Create _dist/jv8.jar">
-        <jar jarfile="_dist/libs/jv8.jar" includes="**/*.class" basedir="bin"/>
+        <jar jarfile="_dist/android/libs/jv8.jar" includes="**/*.class" basedir="bin"/>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
 </project>

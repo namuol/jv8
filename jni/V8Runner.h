@@ -45,6 +45,8 @@ static void dispatchDebugMessages () {
 static void initRemoteDebugging () {
   if (!debuggingInitialized) {
     Debug::SetDebugMessageDispatchHandler(dispatchDebugMessages, true);
+    // TODO: Allow specification of port and whether you want to wait for
+    //        the debugger to attach.
     Debug::EnableAgent("jv8", 51413, false);
     debuggingInitialized = true;
   }
@@ -60,7 +62,7 @@ static void setDebuggingRunner (V8Runner* runner) {
 
   Context::Scope context_scope(runner->getContext());
 
-  dbg_context = Persistent<Context>::New(runner->getContext());
+  dbg_context = Persistent<Context>::New(dbg_isolate, runner->getContext());
   initRemoteDebugging();
 }
 
