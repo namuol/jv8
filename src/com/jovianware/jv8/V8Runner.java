@@ -8,6 +8,12 @@ public class V8Runner {
   }
   
   static {
+    try {
+      System.loadLibrary("gnustl_shared");
+    } catch (UnsatisfiedLinkError e) {
+      e.printStackTrace();
+    }
+    
     System.loadLibrary("jv8");
   }
   
