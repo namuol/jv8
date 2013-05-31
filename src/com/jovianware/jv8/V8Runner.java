@@ -17,7 +17,7 @@ public class V8Runner {
     System.loadLibrary("jv8");
   }
   
-  public static native void setDebuggingRunner(V8Runner v8);
+  public static native void setDebuggingRunner(V8Runner v8, int port, boolean waitForConnection);
   
   public V8Value val(String str) {
     return new V8String(str);

@@ -28,11 +28,13 @@ namespace jv8 {
 static void V8Runner_setDebuggingRunner (
   JNIEnv *env,
   jclass V8runner_class,
-  jobject jrunner
+  jobject jrunner,
+  jint port,
+  jboolean waitForConnection
 ) {
   V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
   if (runner != NULL)  {
-    setDebuggingRunner(runner);
+    setDebuggingRunner(runner, port, waitForConnection);
   } else {
     disableDebugging();
   }
@@ -124,7 +126,7 @@ static JNINativeMethod V8Runner_Methods[] = {
   {(char*)"dispose", (char*)"()V", (void *) jv8::V8Runner_dispose},
   {(char*)"runJS", (char*)"(Ljava/lang/String;Ljava/lang/String;)Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Runner_runJS},
   {(char*)"map", (char*)"(Ljava/lang/String;Lcom/jovianware/jv8/V8MappableMethod;)V", (void *) jv8::V8Runner_map},
-  {(char*)"setDebuggingRunner", (char*)"(Lcom/jovianware/jv8/V8Runner;)V", (void *) jv8::V8Runner_setDebuggingRunner}
+  {(char*)"setDebuggingRunner", (char*)"(Lcom/jovianware/jv8/V8Runner;IZ)V", (void *) jv8::V8Runner_setDebuggingRunner}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////
