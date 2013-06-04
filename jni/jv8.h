@@ -111,10 +111,14 @@ newV8Value (
       value->NumberValue()
     );
   } else if (value->IsString()) {
+    jstring jstr = env->NewStringUTF( *String::Utf8Value(value->ToString()) );
+    
     wrappedReturnValue = env->NewObject(V8String_class,
       m_V8String_init_str,
-      env->NewStringUTF( *String::Utf8Value(value->ToString()) )
+      jstr
     );
+
+    env->DeleteLocalRef(jstr);
   } else if (value->IsBoolean()) {
     wrappedReturnValue = env->NewObject(V8Boolean_class,
       m_V8Boolean_init_bool,
