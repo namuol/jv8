@@ -23,6 +23,7 @@ public:
   Handle<Value> runJS(const char* str);
   void mapMethod (JNIEnv* env,  jobject v8MappableMethod, const char* name);
   void destroy(JNIEnv* env);
+  Handle<Value> callFunction(Handle<Function> function, std::vector<Handle<Value> > args);
   Isolate* getIsolate();
   Handle<Context>& getContext();
 };

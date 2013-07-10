@@ -1,21 +1,6 @@
 package com.jovianware.jv8;
 
-public class V8Undefined implements V8Value {
-
-  @Override
-  public boolean isBoolean() {
-    return false;
-  }
-
-  @Override
-  public boolean isNumber() {
-    return false;
-  }
-
-  @Override
-  public boolean isString() {
-    return false;
-  }
+public class V8Undefined extends V8Value {
 
   @Override
   public boolean isUndefined() {

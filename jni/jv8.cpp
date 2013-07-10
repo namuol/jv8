@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <string.h>
+#include <android/log.h>
 
 #include <v8.h>
 using namespace v8;
@@ -119,6 +120,33 @@ static void V8Runner_map (
   env->ReleaseStringUTFChars(jname, name);
 }
 
+static jobject V8Runner_callFunction (
+  JNIEnv *env,
+  jobject jrunner,
+  jobject jfunction,
+  jobjectArray jargs
+) {
+
+  if (needsToCacheClassData) {
+    cacheClassData(env);
+  }
+
+  V8Runner* runner = (V8Runner*) env->GetLongField(jrunner, f_V8Runner_handle);
+  Persistent<Value>* functionPersistent = (Persistent<Value>*) env->GetLongField(jfunction, f_V8Function_handle);
+  Persistent<Function> function = Persistent<Function>::Cast( *functionPersistent );
+
+  std::vector<Handle<Value> > args;
+  int length = env->GetArrayLength(jargs);
+  for (int i=0; i<length; i++) {
+    jobject obj = env->GetObjectArrayElement(jargs, i);
+    Handle<Value> handle = v8ValueFromJObject(env, obj);
+    args.push_back(handle);
+  }
+
+  Handle<Value> returnedJSValue = runner->callFunction(function, args);
+  return newV8Value(env, returnedJSValue);
+}
+
 } // namespace jv8
 
 static JNINativeMethod V8Runner_Methods[] = {
@@ -126,7 +154,8 @@ static JNINativeMethod V8Runner_Methods[] = {
   {(char*)"dispose", (char*)"()V", (void *) jv8::V8Runner_dispose},
   {(char*)"runJS", (char*)"(Ljava/lang/String;Ljava/lang/String;)Lcom/jovianware/jv8/V8Value;", (void *) jv8::V8Runner_runJS},
   {(char*)"map", (char*)"(Ljava/lang/String;Lcom/jovianware/jv8/V8MappableMethod;)V", (void *) jv8::V8Runner_map},
-  {(char*)"setDebuggingRunner", (char*)"(Lcom/jovianware/jv8/V8Runner;IZ)V", (void *) jv8::V8Runner_setDebuggingRunner}
+  {(char*)"setDebuggingRunner", (char*)"(Lcom/jovianware/jv8/V8Runner;IZ)V", (void *) jv8::V8Runner_setDebuggingRunner},
+  {(char*)"callFunction", (char*)"(Lcom/jovianware/jv8/V8Function;[Lcom/jovianware/jv8/V8Value;)Lcom/jovianware/jv8/V8Value;", (void *)jv8::V8Runner_callFunction}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////

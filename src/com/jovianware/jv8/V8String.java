@@ -1,6 +1,6 @@
 package com.jovianware.jv8;
 
-public class V8String implements V8Value {
+public class V8String extends V8Value {
   private String val;
   
   public V8String() {
@@ -14,25 +14,10 @@ public class V8String implements V8Value {
   public String value() {
     return val;
   }
-  
-  @Override
-  public boolean isBoolean() {
-    return false;
-  }
-
-  @Override
-  public boolean isNumber() {
-    return false;
-  }
 
   @Override
   public boolean isString() {
     return true;
-  }
-
-  @Override
-  public boolean isUndefined() {
-    return false;
   }
 
   @Override
