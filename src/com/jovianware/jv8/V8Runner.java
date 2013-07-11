@@ -33,7 +33,8 @@ public class V8Runner {
   
   private native long create();
   private native void dispose();
-  
+
+  public native V8Value callFunction(V8Function function, V8Value[] args);
   public native V8Value runJS(String name, String src) throws V8Exception;
   
   public V8Value tryRunJS(String name, String src) {
