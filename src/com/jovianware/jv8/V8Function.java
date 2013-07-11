@@ -39,11 +39,11 @@ public class V8Function extends V8Object {
   /**
    * Notifies C++ that it can release the handler.
    */
-  native protected void terminate();
+  native protected void dispose();
 
   @Override
   protected void finalize() throws Throwable {
-    terminate();
+    dispose();
   }
 
   @Override

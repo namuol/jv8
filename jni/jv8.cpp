@@ -153,7 +153,7 @@ static jobject V8Runner_callFunction (
 /**
  * Releases the v8 function handler.
  */
-static void V8Function_terminate(
+static void V8Function_dispose(
   JNIEnv* env,
   jobject jfunction
 ) {
@@ -167,6 +167,7 @@ static void V8Function_terminate(
     Persistent<Function> function = Persistent<Function>::Cast( *functionPersistent );
     function.Dispose();
     function.Clear();
+    delete functionPersistent;
   }
 }
 
@@ -182,7 +183,7 @@ static JNINativeMethod V8Runner_Methods[] = {
 };
 
 static JNINativeMethod V8Function_Methods[] = {
-  {(char*)"terminate", (char*)"()V", (void *) jv8::V8Function_terminate}
+  {(char*)"dispose", (char*)"()V", (void *) jv8::V8Function_dispose}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////
