@@ -6,14 +6,7 @@ package com.jovianware.jv8;
  */
 public class V8Function extends V8Object {
 
-  private long handle;
-
-  /**
-   * For now we don't support JS function instantiation with a String.
-   */
-  public V8Function() {
-    handle = 0;
-  }
+  private long handle = 0;
 
   /**
    * Constructs a function with a native JS Function pointer.
@@ -41,6 +34,16 @@ public class V8Function extends V8Object {
    */
   public boolean isLinked(){
     return handle != 0;
+  }
+
+  /**
+   * Notifies C++ that it can release the handler.
+   */
+  native protected void terminate();
+
+  @Override
+  protected void finalize() throws Throwable {
+    terminate();
   }
 
   @Override

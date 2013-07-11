@@ -1,6 +1,9 @@
 #include <jni.h>
 #include <string.h>
+
+#ifdef __ANDROID__
 #include <android/log.h>
+#endif
 
 #include <v8.h>
 using namespace v8;
@@ -147,6 +150,26 @@ static jobject V8Runner_callFunction (
   return newV8Value(env, returnedJSValue);
 }
 
+/**
+ * Releases the v8 function handler.
+ */
+static void V8Function_terminate(
+  JNIEnv* env,
+  jobject jfunction
+) {
+
+  if (needsToCacheClassData) {
+    cacheClassData(env);
+  }
+
+  Persistent<Value>* functionPersistent = (Persistent<Value>*) env->GetLongField(jfunction, f_V8Function_handle);
+  if(functionPersistent != NULL){
+    Persistent<Function> function = Persistent<Function>::Cast( *functionPersistent );
+    function.Dispose();
+    function.Clear();
+  }
+}
+
 } // namespace jv8
 
 static JNINativeMethod V8Runner_Methods[] = {
@@ -156,6 +179,10 @@ static JNINativeMethod V8Runner_Methods[] = {
   {(char*)"map", (char*)"(Ljava/lang/String;Lcom/jovianware/jv8/V8MappableMethod;)V", (void *) jv8::V8Runner_map},
   {(char*)"setDebuggingRunner", (char*)"(Lcom/jovianware/jv8/V8Runner;IZ)V", (void *) jv8::V8Runner_setDebuggingRunner},
   {(char*)"callFunction", (char*)"(Lcom/jovianware/jv8/V8Function;[Lcom/jovianware/jv8/V8Value;)Lcom/jovianware/jv8/V8Value;", (void *)jv8::V8Runner_callFunction}
+};
+
+static JNINativeMethod V8Function_Methods[] = {
+  {(char*)"terminate", (char*)"()V", (void *) jv8::V8Function_terminate}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,6 +238,10 @@ jint JNI_OnLoad (
   CLASS("com/jovianware/jv8/V8Runner", jv8::V8Runner_class)
   MTABLE(V8Runner_Methods)
   FIELD("handle", "J", jv8::f_V8Runner_handle)
+  CLASS_END()
+
+  CLASS("com/jovianware/jv8/V8Function", jv8::V8Function_class)
+  MTABLE(V8Function_Methods)
   CLASS_END()
 
   CLASS("com/jovianware/jv8/V8Exception", jv8::V8Exception_class)

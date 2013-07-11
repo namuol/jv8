@@ -1,7 +1,6 @@
 #ifndef JV8_H_
 #define JV8_H_
 #include <jni.h>
-#include <android/log.h>
 
 #include <v8.h>
 using namespace v8;
