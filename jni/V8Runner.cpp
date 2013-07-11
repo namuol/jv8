@@ -41,6 +41,10 @@ void V8Runner::mapMethod (JNIEnv* env,  jobject v8MappableMethod, const char* na
   //context->ReattachGlobal(global);
 }
 
+Handle<Value> V8Runner::callFunction(Handle<Function> function, std::vector<Handle<Value> > args) {
+  return function->Call(context->Global(), args.size(), &args[0]);
+}
+
 void V8Runner::destroy (JNIEnv* env) {
   for (uint i=0; i<methodDatas.size(); ++i) {
     env->DeleteGlobalRef(methodDatas[i]->methodObject);

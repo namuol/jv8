@@ -16,4 +16,5 @@ LOCAL_SRC_FILES := jv8.cpp V8Runner.cpp $(wildcard $(LOCAL_PATH)/../support/v8/s
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../support/include
 LOCAL_CFLAGS += -Wall -Wno-unused-function -Wno-unused-variable -O3 -funroll-loops -ftree-vectorize -ffast-math -fpermissive
 LOCAL_STATIC_LIBRARIES := v8_base v8_nosnapshot
+LOCAL_LDLIBS += -L$(SYSROOT)/usr/lib -llog
 include $(BUILD_SHARED_LIBRARY)
