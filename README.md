@@ -122,3 +122,7 @@ jv8.tar.gz/
 
 There will also be GDB stuff in here; the build script does not generate production
 binaries, currently, and I Do Not Recommend using this in production.
+
+---
+
+[![Analytics](https://ga-beacon.appspot.com/UA-33247419-2/jv8/README.md)](https://github.com/igrigorik/ga-beacon)
