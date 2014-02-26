@@ -13,15 +13,16 @@ public class JV8Tester {
   private static final int TEST_INSTANCE_COUNT = 5;
 
   // It's 2013, and Java still doesn't have a join() method in any of its standard utilities.
-  static String join(Collection<?> s, String delimiter) {
+  static String join(final Collection<?> s, final String delimiter) {
     StringBuilder builder = new StringBuilder();
     Iterator<?> iter = s.iterator();
-    while (iter.hasNext()) {
+    if (iter.hasNext()) {
       builder.append(iter.next());
-      if (!iter.hasNext()) {
-        break;
-      }
-      builder.append(delimiter);
+    }
+    while (iter.hasNext()) {
+      builder
+      .append(delimiter)
+      .append(iter.next());
     }
     return builder.toString();
   }
