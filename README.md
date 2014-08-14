@@ -1,6 +1,16 @@
+<strong>
+JV8 needs maintainers. Please [email me](louis.acresti@gmail.com) or [file an issue](http://github.com/namuol/jv8/issues) if you are interested.
+</strong>
+
 # JV8
 
 A simple way to run V8 JavaScript instances from Java.
+
+<strong>
+Warning:
+</strong>
+This project is **highly experimental**.
+
 
 ## Example
 
