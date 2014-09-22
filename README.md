@@ -1,5 +1,5 @@
 <strong>
-JV8 needs maintainers. Please [email me](louis.acresti@gmail.com) or [file an issue](http://github.com/namuol/jv8/issues) if you are interested.
+JV8 needs maintainers. Please [email me](mailto:louis.acresti@gmail.com) or [file an issue](http://github.com/namuol/jv8/issues) if you are interested.
 </strong>
 
 # JV8
