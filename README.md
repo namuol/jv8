@@ -1,6 +1,8 @@
-<strong>
-JV8 needs maintainers. Please [email me](mailto:louis.acresti@gmail.com) or [file an issue](http://github.com/namuol/jv8/issues) if you are interested.
-</strong>
+<center><strong>
+JV8 is no longer maintained. Please [email me](mailto:louis.acresti@gmail.com) or [file an issue](http://github.com/namuol/jv8/issues) if you would like to become a maintainer.
+</strong></center>
+
+In the mean time, keep an eye on Facebook's [React Native](https://github.com/facebook/react-native), as they are bound to provide a good solution for Android soon. (Currently they only support iOS).
 
 # JV8
 
